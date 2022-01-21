@@ -1,49 +1,6 @@
 # make the method to put the code into
 @students = [] 
 
-def input_students
-# put in greeting
-  puts "Please enter the names of the students"
-  puts "To finish, just hit return twice"
-  # get the first name
-  name = gets.chomp
-# while the name is not empty, repeat this code
-  while !name.empty? do 
-# add the student hash to the array
-  @students << {name: name, cohort: :november}
-  puts "Now we have #{@students.count} students"
-# get another name from the user
-  name = gets.chomp
-  end 
-end
-def save_students
-  # opens the file (File.open), "students.csv" the file to open "w" is the code to write in it
-  file = File.open("students.csv", "w")
-  # iterates over the student array from the file
-  @students.each do |student|
-    student_data = [student[:name], student[:cohort]]
-    csv_line = student_data.join(",")
-    file.puts csv_line
-  end 
-   file.close
-end 
-
-def load_students
-  file =File.open("students.csv", "r")
-  file.readlines.each do |line|
-    name, cohort = line.chomp.split(',')
-    @students << {name: name, cohort: cohort.to_sym}
-  end 
-   file.close
-end 
- 
-def interactive_menu
-  loop do
-    print_menu
-    process(gets.chomp)
-  end
-end
-  # 1. print the menu and ask the user what to do
 def print_menu  
     puts "1. Input the students"
     puts "2. Show the students"
@@ -52,11 +9,12 @@ def print_menu
     puts "9. Exit" # 9 as we've more to add
 end
 
-def show_students      
-    print_header
-    print_student_list
-    print_footer
-end   
+def interactive_menu
+  loop do
+    print_menu
+    process(STDIN.gets.chomp)
+  end
+end
 
 def process(selection)
     case selection
@@ -75,11 +33,29 @@ def process(selection)
     end
 end 
 
+def input_students
+  puts "Please enter the names of the students"
+  puts "To finish, just hit return twice"
+  # get the first name
+  name = STDIN.gets.chomp
+  while !name.empty? do 
+  @students << {name: name, cohort: :november}
+  puts "Now we have #{@students.count} students"
+  name = STDIN.gets.chomp
+  end 
+end
+
+def show_students      
+    print_header
+    print_student_list
+    print_footer
+end 
+
 def print_header
   puts "The students of Villains Academy"
   puts "-------------"
 end
-#print the code for printing just the names of the students
+
 def print_student_list
     @students.each do |student|
     puts "#{student[:name]} (#{student[:cohort]} cohort)"
@@ -91,4 +67,38 @@ def print_footer
   puts "Overall, we have #{@students.count} great students"
 end 
 
+def save_students
+  # opens the file (File.open), "students.csv" the file to open "w" is the code to write in it
+  file = File.open("students.csv", "w")
+  # iterates over the student array from the file
+  @students.each do |student|
+    student_data = [student[:name], student[:cohort]]
+    csv_line = student_data.join(",")
+    file.puts csv_line
+  end 
+   file.close
+end 
+
+def load_students(filename = "students.csv")
+  file =File.open("students.csv", "r")
+  file.readlines.each do |line|
+    name, cohort = line.chomp.split(',')
+    @students << {name: name, cohort: cohort.to_sym}
+  end 
+   file.close
+end 
+
+def try_load_students
+  filename = ARGV.first
+  return if filename.nil?
+  if File.exists?(filename)
+    load_students(filename)
+    puts "Loaded #{@students.count} from #{filename}"
+  else 
+    puts "Sorry #{filename} doesn't exist."
+    exit
+  end 
+end 
+
+try_load_students
 interactive_menu
